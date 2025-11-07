@@ -1,146 +1,194 @@
 package com.mauli.levelsystem.gui;
 
+import com.mauli.levelsystem.DataStore;
 import com.mauli.levelsystem.LevelSystemPlugin;
+import com.mauli.levelsystem.logic.LevelManager;
+import com.mauli.levelsystem.logic.LevelManager.Status;
+import com.mauli.levelsystem.hook.VotingHook;
+
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
-import org.bukkit.Sound;
-import org.bukkit.configuration.ConfigurationSection;
+import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 
 public class LevelGUI implements Listener {
 
     private final LevelSystemPlugin plugin;
+    private final DataStore store;
+    private final LevelManager manager;
+
+    private final String title;
+    private final int rows;
+    private final Material frameMat;
+    private final int statsSlot;
+
+    private final Material lockedMat;    // DUNKELBLAU   = gesperrt
+    private final Material availMat;     // HELLBLAU + Glint = einlösbar
+    private final Material claimedMat;   // HELLGRAU     = eingelöst
+    private final boolean availGlow;
 
     public LevelGUI(LevelSystemPlugin plugin) {
         this.plugin = plugin;
-        Bukkit.getPluginManager().registerEvents(this, plugin);
+        this.store  = plugin.getStore();
+        this.manager= plugin.getLevelManager();
+
+        // Konfig lesen
+        this.title     = color(plugin.getConfig().getString("gui.title", "&f&lLEVELS"));
+        this.rows      = plugin.getConfig().getInt("gui.rows", 6);
+        this.frameMat  = Material.matchMaterial(plugin.getConfig().getString("gui.filled_item", "GRAY_STAINED_GLASS_PANE"));
+        this.statsSlot = plugin.getConfig().getInt("gui.stats_slot", 49);
+
+        this.lockedMat   = Material.matchMaterial(plugin.getConfig().getString("items.locked.material", "BLUE_CANDLE"));
+        this.availMat    = Material.matchMaterial(plugin.getConfig().getString("items.available.material", "LIGHT_BLUE_CANDLE"));
+        this.claimedMat  = Material.matchMaterial(plugin.getConfig().getString("items.claimed.material", "LIGHT_GRAY_CANDLE"));
+        this.availGlow   = plugin.getConfig().getBoolean("items.available.glow", true);
     }
 
-    private String color(String s){
-        return ChatColor.translateAlternateColorCodes('&', s == null ? "" : s);
-    }
+    public void open(Player p) {
+        int size = Math.max(1, rows) * 9;
+        Inventory inv = Bukkit.createInventory(null, size, title);
 
-    private ItemStack createItem(Material material, String name, List<String> lore){
-        ItemStack item = new ItemStack(material);
-        ItemMeta meta = item.getItemMeta();
-        if(meta != null){
-            meta.setDisplayName(color(name));
-            if(lore != null){
-                List<String> coloredLore = new ArrayList<>();
-                for(String l : lore) coloredLore.add(color(l));
-                meta.setLore(coloredLore);
-            }
-            item.setItemMeta(meta);
-        }
-        return item;
-    }
+        // alles füllen (Rahmen)
+        ItemStack filler = simple(frameMat, " ");
+        for (int i=0;i<size;i++) inv.setItem(i, filler);
 
-    public void open(Player p, int page){
-        int rows = plugin.getConfig().getInt("gui.rows", 6);
-        int size = rows * 9;
-        Inventory inv = Bukkit.createInventory(p, size, color(plugin.getConfig().getString("gui.title", "&aLevel Menü").replace("%page%", String.valueOf(page))));
+        // Stats Buch
+        inv.setItem(Math.min(statsSlot, size-1), buildStatsItem(p));
 
-        ConfigurationSection section = plugin.getConfig().getConfigurationSection("levels");
-        if(section == null) { p.openInventory(inv); return; }
-
-        List<Integer> ids = new ArrayList<>();
-        for (String key : section.getKeys(false)) {
-            try { ids.add(Integer.parseInt(key)); } catch (Exception ignored) {}
-        }
-        Collections.sort(ids);
-
-        int minutes = plugin.getStore().getPlayMinutes(p.getUniqueId());
-        int votes   = plugin.getStore().getVotes(p.getUniqueId());
-        Set<Integer> claimed = plugin.getStore().getClaimed(p.getUniqueId());
-
-        int slot = 0;
-        for(int level : ids){
-            if(slot >= size) break;
-
-            String base = "levels." + level + ".";
-            int reqMin = plugin.getConfig().getInt(base+"required_playtime_minutes",0);
-            int reqVotes = plugin.getConfig().getInt(base+"required_votes",0);
-            List<String> rewards = plugin.getConfig().getStringList(base+"rewards");
-
-            boolean unlocked = minutes >= reqMin && votes >= reqVotes;
-            boolean already = claimed.contains(level);
-
-            List<String> lore = new ArrayList<>();
-            lore.add("&7Benötigt: &f"+reqMin+" Min, "+reqVotes+" Votes");
-            lore.add("&7Dein Stand: &f"+minutes+" Min, "+votes+" Votes");
-            lore.add("&8Belohnungen:");
-            for(String r : rewards) lore.add("&8 - &7"+r);
-
-            Material icon;
-            String name;
-
-            if(already){
-                icon = Material.GRAY_STAINED_GLASS_PANE;
-                name = "&7Level "+level+" &8| &7Abgeholt";
-            } else if(unlocked){
-                icon = Material.CHEST;
-                name = "&aLevel "+level+" Belohnung abholen";
-                lore.add("&aKlicken!");
-            } else {
-                icon = Material.BARRIER;
-                name = "&cLevel "+level+" gesperrt";
-                lore.add("&cNoch nicht erreicht.");
-            }
-
-            inv.setItem(slot++, createItem(icon, name, lore));
+        // Level Kerzen
+        int count = Math.max(0, store.getLevelCount());
+        for (int lvl = 1; lvl <= count && lvl-1 < size; lvl++) {
+            inv.setItem(lvl-1, buildLevelItem(p, lvl)); // Slots ab 0
         }
 
         p.openInventory(inv);
     }
 
+    private ItemStack buildStatsItem(Player p) {
+        String name = color(plugin.getConfig().getString("stats_item.name", "&f&lSTATS"));
+        Material mat = Material.matchMaterial(plugin.getConfig().getString("stats_item.material", "BOOK"));
+
+        List<String> loreCfg = plugin.getConfig().getStringList("stats_item.lore");
+        List<String> lore = new ArrayList<>();
+        int minutes = store.getPlaytimeMinutes(p.getUniqueId());
+        int votes   = VotingHook.getTotalVotes(p);
+
+        for (String line : loreCfg) {
+            lore.add(color(line.replace("%playtime%", String.valueOf(minutes))
+                              .replace("%votes%", String.valueOf(votes))));
+        }
+        return item(mat, name, lore, false);
+    }
+
+    private ItemStack buildLevelItem(Player p, int level) {
+        Status st = manager.getStatus(p, level);
+
+        String nameAvailable = color(plugin.getConfig().getString("items.available.name", "&bKlicke zum Einlösen"));
+        String nameLocked    = color(plugin.getConfig().getString("items.locked.name", "&9Noch nicht freigeschaltet"));
+        String nameClaimed   = color(plugin.getConfig().getString("items.claimed.name", "&7Bereits eingelöst"));
+
+        String head = ChatColor.AQUA + "LEVEL " + level;
+        List<String> lore = new ArrayList<>();
+        lore.add(head);
+
+        // Fortschritt / Anforderungen
+        int needMin = store.getReqMinutes(level);
+        int haveMin = store.getPlaytimeMinutes(p.getUniqueId());
+        int needVot = store.getReqVotes(level);
+        int haveVot = VotingHook.getTotalVotes(p);
+
+        lore.add(color("&7Spielzeit: &e" + haveMin + "&7/&e" + needMin + " &7Min."));
+        lore.add(color("&7Votes: &b" + haveVot + "&7/&b" + needVot));
+        lore.add(color("&7"));
+
+        // Rewards (nur anzeigen – Inhalte setzt ihr später per Command)
+        List<String> rewards = store.getRewards(level);
+        if (!rewards.isEmpty()) {
+            lore.add(color("&7Belohnungen:"));
+            for (String r : rewards) lore.add(color("&8- &f" + r));
+        }
+
+        switch (st) {
+            case CLAIMED:
+                lore.add(color("&cDu hast diese Belohnung bereits eingelöst"));
+                return item(claimedMat, nameClaimed, lore, false);
+            case AVAILABLE:
+                lore.add(color("&aKlicke zum Einlösen"));
+                return item(availMat, nameAvailable, lore, availGlow);
+            default:
+                lore.add(color("&7Noch nicht freigeschaltet"));
+                return item(lockedMat, nameLocked, lore, false);
+        }
+    }
+
+    private ItemStack simple(Material m, String name) {
+        return item(m, color(name), null, false);
+    }
+
+    private ItemStack item(Material m, String name, List<String> lore, boolean glow) {
+        if (m == null) m = Material.BARRIER;
+        ItemStack it = new ItemStack(m);
+        ItemMeta meta = it.getItemMeta();
+        if (meta != null) {
+            if (name != null) meta.setDisplayName(color(name));
+            if (lore != null) meta.setLore(lore);
+            if (glow) {
+                meta.addEnchant(Enchantment.DURABILITY, 1, true);
+                meta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
+            }
+            it.setItemMeta(meta);
+        }
+        return it;
+    }
+
+    private String color(String s) {
+        return ChatColor.translateAlternateColorCodes('&', s == null ? "" : s);
+    }
+
+    /* ---------------- Click Handling ---------------- */
+
     @EventHandler
-    public void onClick(InventoryClickEvent e){
-        if(!(e.getWhoClicked() instanceof Player p)) return;
-        if(!ChatColor.stripColor(e.getView().getTitle()).contains("Level")) return;
-        e.setCancelled(true);
+    public void onClick(InventoryClickEvent e) {
+        HumanEntity he = e.getWhoClicked();
+        if (!(he instanceof Player)) return;
+        Player p = (Player) he;
 
-        ItemStack clicked = e.getCurrentItem();
-        if(clicked == null || !clicked.hasItemMeta()) return;
+        if (e.getView().getTitle() == null || !e.getView().getTitle().equals(title)) return;
 
-        String name = ChatColor.stripColor(clicked.getItemMeta().getDisplayName());
-        if(!name.contains("Level")) return;
+        e.setCancelled(true); // nichts rausnehmen
+        int slot = e.getRawSlot();
+        if (slot < 0) return;
 
-        try {
-            int level = Integer.parseInt(name.replaceAll("\\D+",""));
-            if(plugin.getStore().isClaimed(p.getUniqueId(), level)){
-                p.sendMessage("§7Belohnung wurde bereits abgeholt.");
-                return;
+        int count = store.getLevelCount();
+        // Level liegen in Slots 0..(count-1)
+        if (slot >= 0 && slot < count) {
+            int level = slot + 1;
+
+            // claim versuchen
+            if (manager.claim(p, level)) {
+                // Slot aktualisieren
+                e.getInventory().setItem(slot, buildLevelItem(p, level));
+            } else {
+                p.sendMessage("§7Dieses Level kann aktuell nicht eingelöst werden.");
             }
+        }
+    }
 
-            String base = "levels."+level+".";
-            int reqMin = plugin.getConfig().getInt(base+"required_playtime_minutes",0);
-            int reqVotes = plugin.getConfig().getInt(base+"required_votes",0);
-
-            if(plugin.getStore().getPlayMinutes(p.getUniqueId()) < reqMin || plugin.getStore().getVotes(p.getUniqueId()) < reqVotes){
-                p.sendMessage("§cNoch nicht erreicht.");
-                return;
-            }
-
-            for(String cmd : plugin.getConfig().getStringList(base+"rewards")){
-                Bukkit.dispatchCommand(Bukkit.getConsoleSender(), cmd.replace("%player%",p.getName()));
-            }
-            plugin.getStore().setClaimed(p.getUniqueId(), level);
-            plugin.getStore().saveNow();
-
-            p.sendMessage("§aBelohnung für Level "+level+" erhalten!");
-            p.playSound(p.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 1, 1);
-            open(p,1);
-
-        } catch (Exception ignored){}
+    @EventHandler
+    public void onClose(InventoryCloseEvent e) {
+        // optional refresh etc.
     }
 }
