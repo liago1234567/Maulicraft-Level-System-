@@ -16,12 +16,17 @@ public class LevelCommand implements CommandExecutor {
 
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
-        if (!(sender instanceof Player player)) {
-            sender.sendMessage("Nur Spieler können diesen Befehl benutzen.");
+
+        if (!(sender instanceof Player)) {
+            sender.sendMessage("§cNur Spieler können diesen Befehl benutzen.");
             return true;
         }
 
-        plugin.getGui().open(player, 1);
+        Player player = (Player) sender;
+
+        // Öffne das neue Level GUI
+        plugin.getGui().open(player);
+
         return true;
     }
-}
+}}
