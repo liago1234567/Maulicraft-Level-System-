@@ -2,22 +2,31 @@ package com.mauli.levelsystem.hook;
 
 import com.mauli.levelsystem.LevelSystemPlugin;
 import org.bukkit.Bukkit;
-import org.bukkit.event.Listener;
+import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 
-public class VotingHook implements Listener {
+import java.util.UUID;
 
-    private final LevelSystemPlugin plugin;
+public final class VotingHook {
+    private static boolean available = false;
 
-    public VotingHook(LevelSystemPlugin plugin) {
-        this.plugin = plugin;
-        // Nur registrieren, wenn VotingPlugin wirklich vorhanden ist
+    public static void init(LevelSystemPlugin plugin) {
         Plugin vp = Bukkit.getPluginManager().getPlugin("VotingPlugin");
-        if (vp != null && vp.isEnabled()) {
-            Bukkit.getPluginManager().registerEvents(this, plugin);
-            plugin.getLogger().info("VotingHook aktiviert (VotingPlugin gefunden).");
+        available = (vp != null && vp.isEnabled());
+        if (available) {
+            plugin.getLogger().info("VotingHook: VotingPlugin erkannt.");
         } else {
-            plugin.getLogger().warning("VotingPlugin nicht gefunden – VotingHook bleibt passiv.");
+            plugin.getLogger().warning("VotingHook: VotingPlugin nicht gefunden – Votes=0.");
         }
+    }
+
+    public static int getTotalVotes(Player p) {
+        return getTotalVotes(p.getUniqueId());
+    }
+
+    public static int getTotalVotes(UUID uuid) {
+        if (!available) return 0;
+        // TODO: Hier echte VotingPlugin-API nutzen.
+        return 0;
     }
 }
