@@ -45,23 +45,27 @@ public class LevelGUI implements Listener {
         this.store  = plugin.getStore();
         this.manager= plugin.getLevelManager();
 
-        // Konfig lesen
         this.title     = color(plugin.getConfig().getString("gui.title", "&f&lLEVELS"));
         this.rows      = plugin.getConfig().getInt("gui.rows", 6);
-        this.frameMat  = Material.matchMaterial(plugin.getConfig().getString("gui.filled_item", "GRAY_STAINED_GLASS_PANE"));
+        this.frameMat  = mat(plugin.getConfig().getString("gui.filled_item", "GRAY_STAINED_GLASS_PANE"));
         this.statsSlot = plugin.getConfig().getInt("gui.stats_slot", 49);
 
-        this.lockedMat   = Material.matchMaterial(plugin.getConfig().getString("items.locked.material", "BLUE_CANDLE"));
-        this.availMat    = Material.matchMaterial(plugin.getConfig().getString("items.available.material", "LIGHT_BLUE_CANDLE"));
-        this.claimedMat  = Material.matchMaterial(plugin.getConfig().getString("items.claimed.material", "LIGHT_GRAY_CANDLE"));
+        this.lockedMat   = mat(plugin.getConfig().getString("items.locked.material", "BLUE_CANDLE"));
+        this.availMat    = mat(plugin.getConfig().getString("items.available.material", "LIGHT_BLUE_CANDLE"));
+        this.claimedMat  = mat(plugin.getConfig().getString("items.claimed.material", "LIGHT_GRAY_CANDLE"));
         this.availGlow   = plugin.getConfig().getBoolean("items.available.glow", true);
+    }
+
+    private Material mat(String name) {
+        Material m = Material.matchMaterial(name);
+        return m != null ? m : Material.BARRIER;
     }
 
     public void open(Player p) {
         int size = Math.max(1, rows) * 9;
         Inventory inv = Bukkit.createInventory(null, size, title);
 
-        // alles füllen (Rahmen)
+        // Rahmen füllen
         ItemStack filler = simple(frameMat, " ");
         for (int i=0;i<size;i++) inv.setItem(i, filler);
 
@@ -79,7 +83,7 @@ public class LevelGUI implements Listener {
 
     private ItemStack buildStatsItem(Player p) {
         String name = color(plugin.getConfig().getString("stats_item.name", "&f&lSTATS"));
-        Material mat = Material.matchMaterial(plugin.getConfig().getString("stats_item.material", "BOOK"));
+        Material mat = mat(plugin.getConfig().getString("stats_item.material", "BOOK"));
 
         List<String> loreCfg = plugin.getConfig().getStringList("stats_item.lore");
         List<String> lore = new ArrayList<>();
@@ -104,7 +108,6 @@ public class LevelGUI implements Listener {
         List<String> lore = new ArrayList<>();
         lore.add(head);
 
-        // Fortschritt / Anforderungen
         int needMin = store.getReqMinutes(level);
         int haveMin = store.getPlaytimeMinutes(p.getUniqueId());
         int needVot = store.getReqVotes(level);
@@ -114,7 +117,6 @@ public class LevelGUI implements Listener {
         lore.add(color("&7Votes: &b" + haveVot + "&7/&b" + needVot));
         lore.add(color("&7"));
 
-        // Rewards (nur anzeigen – Inhalte setzt ihr später per Command)
         List<String> rewards = store.getRewards(level);
         if (!rewards.isEmpty()) {
             lore.add(color("&7Belohnungen:"));
@@ -137,9 +139,7 @@ public class LevelGUI implements Listener {
     private ItemStack simple(Material m, String name) {
         return item(m, color(name), null, false);
     }
-
     private ItemStack item(Material m, String name, List<String> lore, boolean glow) {
-        if (m == null) m = Material.BARRIER;
         ItemStack it = new ItemStack(m);
         ItemMeta meta = it.getItemMeta();
         if (meta != null) {
@@ -153,13 +153,9 @@ public class LevelGUI implements Listener {
         }
         return it;
     }
-
-    private String color(String s) {
-        return ChatColor.translateAlternateColorCodes('&', s == null ? "" : s);
-    }
+    private String color(String s) { return ChatColor.translateAlternateColorCodes('&', s == null ? "" : s); }
 
     /* ---------------- Click Handling ---------------- */
-
     @EventHandler
     public void onClick(InventoryClickEvent e) {
         HumanEntity he = e.getWhoClicked();
@@ -168,27 +164,19 @@ public class LevelGUI implements Listener {
 
         if (e.getView().getTitle() == null || !e.getView().getTitle().equals(title)) return;
 
-        e.setCancelled(true); // nichts rausnehmen
+        e.setCancelled(true);
         int slot = e.getRawSlot();
         if (slot < 0) return;
 
         int count = store.getLevelCount();
-        // Level liegen in Slots 0..(count-1)
         if (slot >= 0 && slot < count) {
             int level = slot + 1;
-
-            // claim versuchen
             if (manager.claim(p, level)) {
-                // Slot aktualisieren
                 e.getInventory().setItem(slot, buildLevelItem(p, level));
             } else {
                 p.sendMessage("§7Dieses Level kann aktuell nicht eingelöst werden.");
             }
         }
     }
-
-    @EventHandler
-    public void onClose(InventoryCloseEvent e) {
-        // optional refresh etc.
-    }
+    @EventHandler public void onClose(InventoryCloseEvent e) {}
 }
