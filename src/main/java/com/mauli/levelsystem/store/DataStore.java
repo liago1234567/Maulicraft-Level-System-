@@ -110,24 +110,29 @@ public class DataStore {
         votes.put(id, Math.max(0, value));
     }
 
-    /* =============== CLAIMS ================= */
+/* ============== CLAIMS ============== */
 
-    public boolean isClaimed(UUID id, int level) {
-        return claimed.getOrDefault(id, Collections.emptySet()).contains(level);
-    }
+public boolean isClaimed(UUID id, int level) {
+    return claimed.getOrDefault(id, Collections.emptySet()).contains(level);
+}
 
-    public void markClaimed(UUID id, int level) {
-        claimed.computeIfAbsent(id, k -> new HashSet<>()).add(level);
-    }
+public void markClaimed(UUID id, int level) {
+    claimed.computeIfAbsent(id, k -> new HashSet<>()).add(level);
+}
 
-    public void resetClaims(UUID id) {
-        claimed.remove(id);
-    }
-    public java.util.List<String> getRewardsDisplay(int level) {
+public void resetClaims(UUID id) {
+    claimed.remove(id);
+}
+
+/**
+ * Belohnungen (Lore-Anzeige) für GUI aus Config holen
+ * Beispiel: levels.1.rewards_display:
+ */
+public java.util.List<String> getRewardsDisplay(int level) {
     String path = "levels." + level + ".rewards_display";
-    java.util.List<String> l = plugin.getConfig().getStringList(path);
-    return (l == null) ? new java.util.ArrayList<>() : new java.util.ArrayList<>(l);
-    }
-  }
+    java.util.List<String> list = plugin.getConfig().getStringList(path);
+    return (list == null) ? new java.util.ArrayList<>() : new java.util.ArrayList<>(list);
+}
+}
     
     
