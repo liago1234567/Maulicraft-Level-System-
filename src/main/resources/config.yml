@@ -1,27 +1,28 @@
-gui:
-  title: "&f&lLEVELS"
-  rows: 6
-  filled_item: "GRAY_STAINED_GLASS_PANE"
-  stats_slot: 49
-
-items:
-  locked:
-    material: LIGHT_BLUE_CANDLE
-    name: "&9Noch nicht freigeschaltet"
-  available:
-    material: BLUE_CANDLE
-    glow: true
-    name: "&bKlicke zum Einlösen"
-  claimed:
-    material: LIGHT_GRAY_CANDLE
-    name: "&7Bereits einglöst"
-
 stats_item:
-  material: BOOK
   name: "&f&lSTATS"
+  material: "BOOK"
   lore:
-    - "&7Spielzeit: &e%playtime% Minuten"
+    - "&7Spielzeit: &e%playtime% &7Min."
     - "&7Votes: &b%votes%"
 
+items:
+  claim_name: "&aBelohnung abholen"
+  claimed_name: "&7Bereits abgeholt"
+  locked_name: "&9Gesperrt"
+
 levels:
-  count: 45   # Anzahl der Level (egal ob 10, 20, 45, 100...)
+  "1":
+    required_playtime_minutes: 30
+    required_votes: 1
+    rewards:
+      - "say %player% hat Level 1 Belohnung eingelöst!"
+  "2":
+    required_playtime_minutes: 120
+    required_votes: 2
+    rewards:
+      - "say %player% hat Level 2 Belohnung eingelöst!"
+  "3":
+    required_playtime_minutes: 300
+    required_votes: 3
+    rewards:
+      - "say %player% hat Level 3 Belohnung eingelöst!")
