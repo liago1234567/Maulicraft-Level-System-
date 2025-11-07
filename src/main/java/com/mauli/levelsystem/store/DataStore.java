@@ -127,4 +127,4 @@ public class DataStore {
     String path = "levels." + level + ".rewards_display";
     java.util.List<String> l = plugin.getConfig().getStringList(path);
     return (l == null) ? new java.util.ArrayList<>() : new java.util.ArrayList<>(l);
-}
+    }
