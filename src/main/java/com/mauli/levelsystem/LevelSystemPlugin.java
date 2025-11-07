@@ -1,0 +1,43 @@
+package com.mauli.levelsystem;
+
+import com.mauli.levelsystem.commands.LevelAdminCommand;
+import com.mauli.levelsystem.commands.LevelCommand;
+import com.mauli.levelsystem.gui.LevelGUI;
+import com.mauli.levelsystem.logic.LevelManager;
+import com.mauli.levelsystem.store.DataStore;
+import com.mauli.levelsystem.tracker.PlaytimeTracker;
+import org.bukkit.plugin.java.JavaPlugin;
+
+public class LevelSystemPlugin extends JavaPlugin {
+    private static LevelSystemPlugin instance;
+
+    private DataStore store;
+    private LevelManager manager;
+    private LevelGUI gui;
+    private PlaytimeTracker tracker;
+
+    public static LevelSystemPlugin getInstance() { return instance; }
+    public DataStore getStore() { return store; }
+    public LevelManager getLevelManager() { return manager; }
+    public LevelGUI getGui() { return gui; }
+
+    @Override public void onEnable() {
+        instance = this;
+        saveDefaultConfig();
+
+        this.store = new DataStore(this);
+        this.manager = new LevelManager(this);
+        this.gui = new LevelGUI(this);
+        this.tracker = new PlaytimeTracker(this);
+
+        getCommand("level").setExecutor(new LevelCommand(this));
+        getCommand("leveladmin").setExecutor(new LevelAdminCommand(this));
+
+        getLogger().info("LevelSystem aktiviert.");
+    }
+
+    @Override public void onDisable() {
+        if (tracker != null) tracker.stop();
+        if (store != null) store.savePlayers();
+    }
+}
