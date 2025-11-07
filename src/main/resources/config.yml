@@ -1,71 +1,54 @@
-gui:
-  title: "&f&lLEVELS"
-  rows: 5                      # 5 Reihen = 45 Slots
-  filler_last_row: true        # nur unterste Reihe füllen
-  filler_material: "GRAY_STAINED_GLASS_PANE"
+title: "&7SPIELZEIT LEVEL"
+rows: 6                       # ein Slot größer als vorher (6 Reihen)
 
-  # Optional: ein bestimmtes Level hervorheben (eigener Slot, Glühen, anderes Material)
-  highlight:
-    enabled: true
-    level: 1                   # welches Level?
-    slot: 13                   # Slot 0..(rows*9-1)
-    material: "LIGHT_BLUE_CANDLE"
-    glow: true
-    name: "&bFEATURED: Level %level%"
-    lore:
-      - "&7Schnapp dir zuerst dieses Level!"
-      - "&7Benötigt: &e%need_hours%h &7/ &b%need_votes% Votes"
+# Filler nur in der letzten Zeile
+fill_last_row_only: true
+filler_material: GRAY_STAINED_GLASS_PANE
 
+# Kerzen-Farben:
+# - hellblau = einlösbar
+# - blau     = gesperrt
+# - grau     = bereits eingelöst
+materials:
+  claimed: LIGHT_GRAY_CANDLE
+  available: LIGHT_BLUE_CANDLE
+  locked: BLUE_CANDLE
+
+# Stats-Item unten Mitte (Slot 49 bei 6 Reihen)
 stats_item:
-  material: "BOOK"
-  name: "&f&lSTATS"
+  slot: 49
+  material: BOOK
+  name: "&bSTATISTIKEN"
   lore:
-    - "&7Spielzeit: &e%have_hours%h"
-    - "&7Votes: &b%have_votes%"
+    - "&7DEINE SPIELZEIT: &e%hours%h"
+    - "&7DEINE VOTES: &b%votes%"
+    - "&8Empty"
 
+# Texte für den Status
 items:
-  locked:
-    material: "BLUE_CANDLE"            # dunkelblau
-    name: "&9Noch nicht freigeschaltet"
-    lore:
-      - "&7LEVEL %level%"
-      - "&7Spielzeit: &e%have_hours%h &7/ &e%need_hours%h"
-      - "&7Votes: &b%have_votes% &7/ &b%need_votes%"
-      - "&8&oErfülle erst die Bedingungen."
-  available:
-    material: "LIGHT_BLUE_CANDLE"      # hellblau
-    glow: true
-    name: "&bKlicke zum Einlösen"
-    lore:
-      - "&7LEVEL %level%"
-      - "&7Spielzeit: &e%have_hours%h &7/ &e%need_hours%h"
-      - "&7Votes: &b%have_votes% &7/ &b%need_votes%"
-      - "&aKlicke zum Einlösen!"
-  claimed:
-    material: "LIGHT_GRAY_CANDLE"      # grau
-    name: "&7Bereits eingelöst"
-    lore:
-      - "&7LEVEL %level%"
-      - "&8Du hast diese Belohnung schon."
+  claim_name: "&eKlicke zum Einlösen"
+  claimed_name: "&7Bereits eingelöst"
+  locked_name: "&8Noch nicht freigeschaltet"
 
+# Beispiel-Levels (du kannst sie frei anpassen)
 levels:
   "1":
-    required_playtime_minutes: 30
+    required_playtime_minutes: 60
     required_votes: 1
-    # Optional: pro Level eigener Name/Lore/Material (überschreibt items.*)
-    display:
-      name: "&bLevel Eins"
-      lore:
-        - "&7Spezielle Beschreibung für Level 1"
     rewards:
-      - "say %player% hat Level 1 eingelöst!"
+      - "eco give %player% 500"
+      - "crate key %player% basic 1"
   "2":
-    required_playtime_minutes: 120
-    required_votes: 2
-    rewards:
-      - "say %player% hat Level 2 eingelöst!"
-  "3":
     required_playtime_minutes: 300
     required_votes: 3
     rewards:
-      - "say %player% hat Level 3 eingelöst!"
+      - "eco give %player% 2000"
+      - "coins add %player% 100"
+      - "crate key %player% rare 1"
+
+# Nachrichten
+messages:
+  not_ready: "&cDu hast die Anforderungen für Level %level% noch nicht erfüllt."
+  already_claimed: "&7Dieses Level wurde bereits abgeholt."
+  claimed: "&aLevel %level% Belohnung eingelöst!"
+  reloaded: "&aConfig neu geladen."
