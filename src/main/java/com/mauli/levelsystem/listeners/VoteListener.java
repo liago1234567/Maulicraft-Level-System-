@@ -3,7 +3,7 @@ package com.mauli.levelsystem.listeners;
 import com.mauli.levelsystem.LevelSystemPlugin;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
-import org.bukkit.event.player.PlayerVoteEvent;
+import org.bukkit.event.player.PlayerJoinEvent;
 
 public class VoteListener implements Listener {
 
@@ -14,8 +14,8 @@ public class VoteListener implements Listener {
     }
 
     @EventHandler
-    public void onVote(PlayerVoteEvent event) {
-        // +1 Vote hinzufügen
-        plugin.addVotes(event.getPlayer().getUniqueId(), 1);
+    public void onJoin(PlayerJoinEvent event) {
+        // Test: Wird angezeigt, wenn der Listener aktiv ist
+        event.getPlayer().sendMessage("§aVoteListener aktiv ✅");
     }
 }
