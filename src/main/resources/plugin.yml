@@ -1,15 +1,14 @@
 name: LevelSystem
 main: com.mauli.levelsystem.LevelSystemPlugin
 version: 1.0.0
-api-version: '1.20'
-authors: [ 'MauliCraft' ]
+api-version: '1.21'
 commands:
   level:
-    description: Öffnet das Level-Interface
+    description: Öffnet das Level-Menü
     usage: /level
   leveladmin:
-    description: Admin-Tools
-    usage: /leveladmin <reload|addvotes|open|resetclaim>
+    description: Admin-Befehle fürs Levelsystem
+    usage: /leveladmin
 permissions:
   levelsystem.admin:
     default: op
