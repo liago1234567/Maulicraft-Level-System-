@@ -1,10 +1,11 @@
 package com.mauli.levelsystem;
 
+import com.mauli.levelsystem.commands.LevelAdminCommand;
 import com.mauli.levelsystem.commands.LevelCommand;
 import com.mauli.levelsystem.gui.LevelGUI;
+import com.mauli.levelsystem.hook.VotingHook;
 import com.mauli.levelsystem.logic.LevelManager;
 import com.mauli.levelsystem.tracker.PlaytimeTracker;
-
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -25,19 +26,35 @@ public class LevelSystemPlugin extends JavaPlugin {
     public void onEnable() {
         instance = this;
 
-        saveDefaultConfig(); // stellt config.yml bereit
+        // config.yml bei Bedarf erzeugen/laden
+        saveDefaultConfig();
+
+        // Kern-Komponenten
         this.store = new DataStore(this);
         this.levelManager = new LevelManager(this);
         this.gui = new LevelGUI(this);
 
-        // Spielzeit alle 60s hochzählen
+        // Spielzeit-Tracker: jede Minute speichern/prüfen
         new PlaytimeTracker(this).runTaskTimer(this, 20L, 20L * 60);
 
-        // /level
-        getCommand("level").setExecutor(new LevelCommand(this));
+        // Commands
+        if (getCommand("level") != null) {
+            getCommand("level").setExecutor(new LevelCommand(this));
+        }
+        if (getCommand("leveladmin") != null) {
+            getCommand("leveladmin").setExecutor(new LevelAdminCommand(this));
+        }
 
-        // GUI-Listener
+        // GUI als Listener registrieren (für Klicks im Inventar)
         Bukkit.getPluginManager().registerEvents(gui, this);
+
+        // VotingPlugin-Hook (optional)
+        if (Bukkit.getPluginManager().getPlugin("VotingPlugin") != null) {
+            new VotingHook(this); // initialisiert den Hook
+            getLogger().info("VotingPlugin gefunden → Vote-Integration aktiv.");
+        } else {
+            getLogger().warning("VotingPlugin nicht gefunden → Vote-Anforderungen werden ignoriert.");
+        }
 
         getLogger().info("LevelSystem aktiviert.");
     }
