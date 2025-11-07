@@ -128,3 +128,6 @@ public class DataStore {
     java.util.List<String> l = plugin.getConfig().getStringList(path);
     return (l == null) ? new java.util.ArrayList<>() : new java.util.ArrayList<>(l);
     }
+  }
+    
+    
