@@ -123,4 +123,8 @@ public class DataStore {
     public void resetClaims(UUID id) {
         claimed.remove(id);
     }
+    public java.util.List<String> getRewardsDisplay(int level) {
+    String path = "levels." + level + ".rewards_display";
+    java.util.List<String> l = plugin.getConfig().getStringList(path);
+    return (l == null) ? new java.util.ArrayList<>() : new java.util.ArrayList<>(l);
 }
