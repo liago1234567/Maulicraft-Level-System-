@@ -3,6 +3,7 @@ package com.mauli.levelsystem;
 import com.mauli.levelsystem.commands.LevelAdminCommand;
 import com.mauli.levelsystem.commands.LevelCommand;
 import com.mauli.levelsystem.gui.LevelGUI;
+import com.mauli.levelsystem.listeners.VoteListener;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
 
