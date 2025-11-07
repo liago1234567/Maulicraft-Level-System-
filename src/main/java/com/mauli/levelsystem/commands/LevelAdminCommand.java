@@ -1,7 +1,6 @@
 package com.mauli.levelsystem.commands;
 
 import com.mauli.levelsystem.LevelSystemPlugin;
-import com.mauli.levelsystem.gui.LevelGUI;
 import org.bukkit.Bukkit;
 import org.bukkit.command.*;
 import org.bukkit.entity.Player;
@@ -17,34 +16,50 @@ public class LevelAdminCommand implements CommandExecutor {
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
         if (!sender.hasPermission("levelsystem.admin")) {
-            sender.sendMessage("§cKeine Rechte.");
+            sender.sendMessage("§cDu hast keine Berechtigung dafür.");
             return true;
         }
 
         if (args.length == 0) {
-            sender.sendMessage("§e/leveladmin reload | addvotes <Spieler> <Zahl> | open <Spieler> | resetclaim <Spieler> <Level>");
+            sender.sendMessage("§eBenutzung:");
+            sender.sendMessage("§e/leveladmin reload");
+            sender.sendMessage("§e/leveladmin open <Spieler>");
+            sender.sendMessage("§e/leveladmin addvotes <Spieler> <Zahl>");
+            sender.sendMessage("§e/leveladmin resetclaim <Spieler> <Level>");
             return true;
         }
 
         switch (args[0].toLowerCase()) {
+
             case "reload" -> {
                 plugin.reloadConfig();
                 sender.sendMessage("§aConfig neu geladen.");
             }
-            case "addvotes" -> {
-                if (args.length < 3) return false;
-                Player p = Bukkit.getPlayer(args[1]);
-                if (p == null) return true;
-                plugin.getConfig().set("players." + p.getUniqueId() + ".votes",
-                        plugin.getConfig().getInt("players." + p.getUniqueId() + ".votes") + Integer.parseInt(args[2]));
-                plugin.saveConfig();
-                sender.sendMessage("§aVotes hinzugefügt.");
-            }
+
             case "open" -> {
-                if (args.length < 2) return false;
-                Player p = Bukkit.getPlayer(args[1]);
+                if (args.length < 2) return true;
+                Player p = Bukkit.getPlayerExact(args[1]);
                 if (p == null) return true;
-                new LevelGUI(plugin).open(p, 1);
+                plugin.getGui().open(p, 1);
+                sender.sendMessage("§aGUI geöffnet für " + p.getName());
+            }
+
+            case "addvotes" -> {
+                if (args.length < 3) return true;
+                Player p = Bukkit.getPlayerExact(args[1]);
+                if (p == null) return true;
+                int amount = Integer.parseInt(args[2]);
+                plugin.getStore().addVotes(p.getUniqueId(), amount);
+                sender.sendMessage("§a" + amount + " Votes hinzugefügt für " + p.getName());
+            }
+
+            case "resetclaim" -> {
+                if (args.length < 3) return true;
+                Player p = Bukkit.getPlayerExact(args[1]);
+                if (p == null) return true;
+                int level = Integer.parseInt(args[2]);
+                plugin.getStore().resetClaim(p.getUniqueId(), level);
+                sender.sendMessage("§aClaim für Level " + level + " zurückgesetzt.");
             }
         }
 
