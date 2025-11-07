@@ -1,0 +1,33 @@
+gui:
+  title: "&bMauli Level &7(Seite %page%)"
+  rows: 6
+  items:
+    claim_name: "&aBelohnung abholen"
+    claimed_name: "&7Bereits abgeholt"
+    locked_name: "&cGesperrt"
+
+levels:
+  "1":
+    required_playtime_minutes: 30
+    required_votes: 1
+    rewards:
+      - "eco give %player% 500"
+      - "crate key %player% basic 1"
+  "2":
+    required_playtime_minutes: 120
+    required_votes: 2
+    rewards:
+      - "coins add %player% 100"
+      - "crate key %player% rare 1"
+  "3":
+    required_playtime_minutes: 300
+    required_votes: 3
+    rewards:
+      - "eco give %player% 2000"
+      - "crate key %player% epic 1"
+
+messages:
+  not_reached: "&cDu hast die Anforderungen für Level %level% noch nicht erfüllt."
+  already_claimed: "&7Level %level% wurde bereits abgeholt."
+  claimed: "&aBelohnung für Level %level% abgeholt!"
+  reloaded: "&aConfig neu geladen."
