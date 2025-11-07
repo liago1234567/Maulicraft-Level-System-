@@ -147,7 +147,7 @@ public class LevelGUI implements Listener {
             if (name != null) meta.setDisplayName(name);
             if (lore != null) meta.setLore(lore);
             if (glow) {
-                meta.addEnchant(Enchantment.DURABILITY, 1, true);
+                meta.addEnchant(Enchantment.UNBREAKING, 1, true);
                 meta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
             }
             it.setItemMeta(meta);
