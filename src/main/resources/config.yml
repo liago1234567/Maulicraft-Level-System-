@@ -1,20 +1,14 @@
 title: "&7SPIELZEIT LEVEL"
-rows: 6                       # ein Slot größer als vorher (6 Reihen)
+rows: 6
 
-# Filler nur in der letzten Zeile
 fill_last_row_only: true
 filler_material: GRAY_STAINED_GLASS_PANE
 
-# Kerzen-Farben:
-# - hellblau = einlösbar
-# - blau     = gesperrt
-# - grau     = bereits eingelöst
 materials:
   claimed: LIGHT_GRAY_CANDLE
   available: LIGHT_BLUE_CANDLE
-  locked: BLUE_CANDLE
+  locked: LIGHT_BLUE_CANDLE    # gesperrt = hellblau ohne Glow
 
-# Stats-Item unten Mitte (Slot 49 bei 6 Reihen)
 stats_item:
   slot: 49
   material: BOOK
@@ -24,13 +18,18 @@ stats_item:
     - "&7DEINE VOTES: &b%votes%"
     - "&8Empty"
 
-# Texte für den Status
 items:
-  claim_name: "&eKlicke zum Einlösen"
+  claim_name: "&eKLICKE ZUM EINLÖSEN!"
   claimed_name: "&7Bereits eingelöst"
-  locked_name: "&8Noch nicht freigeschaltet"
+  locked_name: "&bNoch nicht freigeschaltet"
 
-# Beispiel-Levels (du kannst sie frei anpassen)
+messages:
+  not_ready: "&cDu hast die Anforderungen für Level %level% noch nicht erfüllt."
+  already_claimed: "&7Dieses Level wurde bereits abgeholt."
+  claimed: "&aLevel %level% Belohnung eingelöst!"
+  reloaded: "&aConfig neu geladen."
+
+# ---- HIER definierst du die Level, Anforderungen, Commands und die SCHÖNE Anzeige ----
 levels:
   "1":
     required_playtime_minutes: 60
@@ -38,6 +37,10 @@ levels:
     rewards:
       - "eco give %player% 500"
       - "crate key %player% basic 1"
+    rewards_display:
+      - "&f• &b500 Coins"
+      - "&f• &b1× Basic Crate Key"
+
   "2":
     required_playtime_minutes: 300
     required_votes: 3
@@ -45,10 +48,17 @@ levels:
       - "eco give %player% 2000"
       - "coins add %player% 100"
       - "crate key %player% rare 1"
+    rewards_display:
+      - "&f• &b2.000 Coins"
+      - "&f• &b+100 MauliCoins"
+      - "&f• &b1× Rare Crate Key"
 
-# Nachrichten
-messages:
-  not_ready: "&cDu hast die Anforderungen für Level %level% noch nicht erfüllt."
-  already_claimed: "&7Dieses Level wurde bereits abgeholt."
-  claimed: "&aLevel %level% Belohnung eingelöst!"
-  reloaded: "&aConfig neu geladen."
+  "3":
+    required_playtime_minutes: 600
+    required_votes: 5
+    rewards:
+      - "eco give %player% 5000"
+      - "crate key %player% epic 1"
+    rewards_display:
+      - "&f• &b5.000 Coins"
+      - "&f• &b1× Epic Crate Key"
