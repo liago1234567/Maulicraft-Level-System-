@@ -3,7 +3,6 @@ package com.mauli.levelsystem;
 import com.mauli.levelsystem.commands.LevelAdminCommand;
 import com.mauli.levelsystem.commands.LevelCommand;
 import com.mauli.levelsystem.gui.LevelGUI;
-import com.mauli.levelsystem.listeners.VoteListener;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -33,7 +32,6 @@ public class LevelSystemPlugin extends JavaPlugin {
         getCommand("leveladmin").setExecutor(new LevelAdminCommand(this));
 
         // Optional: VoteListener registrieren (nur nötig, wenn du später NuVotifier nutzt)
-        Bukkit.getPluginManager().registerEvents(new VoteListener(this), this);
 
         getLogger().info("LevelSystem aktiviert.");
     }
