@@ -1,22 +1,19 @@
 title: "&7SPIELZEIT LEVEL"
 rows: 6
 
-fill_last_row_only: true
-filler_material: GRAY_STAINED_GLASS_PANE
-
-materials:
-  claimed: LIGHT_GRAY_CANDLE
-  available: LIGHT_BLUE_CANDLE
-  locked: LIGHT_BLUE_CANDLE    # gesperrt = hellblau ohne Glow
-
+# Alle Slots außer dem Stats-Slot werden mit Kerzen gefüllt
 stats_item:
-  slot: 49
+  slot: 49                 # 6 Reihen → Slot 49 ist Mitte unten (1..54)
   material: BOOK
   name: "&bSTATISTIKEN"
   lore:
     - "&7DEINE SPIELZEIT: &e%hours%h"
     - "&7DEINE VOTES: &b%votes%"
-    - "&8Empty"
+
+materials:
+  claimed: LIGHT_GRAY_CANDLE
+  available: LIGHT_BLUE_CANDLE   # einlösbar → gleiches Material, aber Glow
+  locked: LIGHT_BLUE_CANDLE      # gesperrt → ohne Glow
 
 items:
   claim_name: "&eKLICKE ZUM EINLÖSEN!"
@@ -29,15 +26,15 @@ messages:
   claimed: "&aLevel %level% Belohnung eingelöst!"
   reloaded: "&aConfig neu geladen."
 
-# ---- HIER definierst du die Level, Anforderungen, Commands und die SCHÖNE Anzeige ----
+# Levels – hier stellst du alles ein
 levels:
   "1":
     required_playtime_minutes: 60
     required_votes: 1
-    rewards:
+    rewards:                       # echte Server-Commands
       - "eco give %player% 500"
       - "crate key %player% basic 1"
-    rewards_display:
+    rewards_display:               # die hübsche Anzeige im GUI
       - "&f• &b500 Coins"
       - "&f• &b1× Basic Crate Key"
 
@@ -52,13 +49,3 @@ levels:
       - "&f• &b2.000 Coins"
       - "&f• &b+100 MauliCoins"
       - "&f• &b1× Rare Crate Key"
-
-  "3":
-    required_playtime_minutes: 600
-    required_votes: 5
-    rewards:
-      - "eco give %player% 5000"
-      - "crate key %player% epic 1"
-    rewards_display:
-      - "&f• &b5.000 Coins"
-      - "&f• &b1× Epic Crate Key"
