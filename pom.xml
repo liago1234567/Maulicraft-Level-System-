@@ -2,15 +2,15 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
-
   <groupId>com.mauli</groupId>
   <artifactId>levelsystem</artifactId>
   <version>1.0.0</version>
-  <name>LevelSystem</name>
+  <name>Maulicraft Level System</name>
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <maven.compiler.release>21</maven.compiler.release>
+    <maven.compiler.source>21</maven.compiler.source>
+    <maven.compiler.target>21</maven.compiler.target>
   </properties>
 
   <repositories>
@@ -21,6 +21,7 @@
   </repositories>
 
   <dependencies>
+    <!-- Paper/Bukkit API 1.21.5 -->
     <dependency>
       <groupId>io.papermc.paper</groupId>
       <artifactId>paper-api</artifactId>
@@ -28,25 +29,14 @@
       <scope>provided</scope>
     </dependency>
 
-    <!-- VotingPlugin API (optional, wenn installiert) -->
+    <!-- Optional: Votifier (NuVotifier) – nur wenn du Auto-Vote-Zählung willst -->
+    <!--
     <dependency>
-      <groupId>com.bencodez</groupId>
-      <artifactId>VotingPlugin</artifactId>
-      <version>6.15.1</version>
+      <groupId>com.vexsoftware</groupId>
+      <artifactId>votifier</artifactId>
+      <version>2.7.3</version>
       <scope>provided</scope>
     </dependency>
+    -->
   </dependencies>
-
-  <build>
-    <plugins>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-compiler-plugin</artifactId>
-        <version>3.11.0</version>
-        <configuration>
-          <release>21</release>
-        </configuration>
-      </plugin>
-    </plugins>
-  </build>
 </project>
