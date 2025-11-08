@@ -1,5 +1,6 @@
 package com.mauli.levelsystem;
 
+import com.mauli.levelsystem.hook.VoteListener;
 import com.mauli.levelsystem.commands.LevelAdminCommand;
 import com.mauli.levelsystem.commands.LevelCommand;
 import com.mauli.levelsystem.gui.LevelGUI;
