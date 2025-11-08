@@ -38,12 +38,12 @@ public class LevelSystemPlugin extends JavaPlugin {
         getCommand("leveladmin").setExecutor(new LevelAdminCommand(this));
 
         // Optional: Votifier Auto-Vote (nur wenn Plugin installiert ist)
-        if (getServer().getPluginManager().getPlugin("Votifier") != null) {
-            getServer().getPluginManager().registerEvents(new com.mauli.levelsystem.hook.VoteListener(this), this);
-            getLogger().info("Votifier erkannt – Votes werden automatisch gezählt.");
-        } else {
-            getLogger().info("Votifier nicht gefunden – Votes bitte per Command setzen (oder VotingPlugin-Hook nutzen).");
-        }
+   if (getServer().getPluginManager().getPlugin("Votifier") != null) {
+    getServer().getPluginManager().registerEvents(new VotingHook(this), this);
+    getLogger().info("Votifier erkannt – Votes werden automatisch gezählt.");
+} else {
+    getLogger().warning("Votifier NICHT gefunden! Bitte Votifier installieren.");
+}
     }
 
     @Override
